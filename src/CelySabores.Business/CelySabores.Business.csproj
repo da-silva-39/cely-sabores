@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <RootNamespace>CelySabores.Business</RootNamespace>
+    <AssemblyName>CelySabores.Business</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CelySabores.Data\CelySabores.Data.csproj" />
+    <ProjectReference Include="..\CelySabores.Models\CelySabores.Models.csproj" />
+  </ItemGroup>
+</Project>

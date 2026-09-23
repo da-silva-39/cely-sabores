@@ -1,3 +1,6 @@
 <Solution>
-  <Project Path="Cely Sabores/Cely Sabores.csproj" />
+  <Project Path="src/Cely Sabores/Cely Sabores.csproj" />
+  <Project Path="src/CelySabores.Models/CelySabores.Models.csproj" />
+  <Project Path="src/CelySabores.Data/CelySabores.Data.csproj" />
+  <Project Path="src/CelySabores.Business/CelySabores.Business.csproj" />
 </Solution>
