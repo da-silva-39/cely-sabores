@@ -1,5 +1,5 @@
 <Solution>
-  <Project Path="src/Cely Sabores/Cely Sabores.csproj" />
+  <Project Path="src/Cely Sabores/Cely Sabores.csproj" Id="a5f7a989-f3ae-4cd9-ae5a-ba6ce9537269" />
   <Project Path="src/CelySabores.Models/CelySabores.Models.csproj" />
   <Project Path="src/CelySabores.Data/CelySabores.Data.csproj" />
   <Project Path="src/CelySabores.Business/CelySabores.Business.csproj" />
