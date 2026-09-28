@@ -6,5 +6,10 @@ namespace CelySabores.Models.Entities
         public string Nome { get; set; }
         public bool Ativo { get; set; }
         public int Ordem { get; set; }
+
+        public override string ToString()
+        {
+            return string.IsNullOrWhiteSpace(Nome) ? "(categoria)" : Nome;
+        }
     }
 }

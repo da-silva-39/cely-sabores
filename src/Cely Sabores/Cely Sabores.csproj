@@ -67,6 +67,29 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormularioLogin.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormularioShell.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogos.cs" />
+    <Compile Include="DialogosCardapio.cs" />
+    <Compile Include="DialogosPedido.cs" />
+    <Compile Include="DialogosReserva.cs" />
+    <Compile Include="DialogosFuncionario.cs" />
+    <Compile Include="PainelBase.cs" />
+    <Compile Include="PainelDashboard.cs" />
+    <Compile Include="PainelMesas.cs" />
+    <Compile Include="PainelCardapio.cs" />
+    <Compile Include="PainelClientes.cs" />
+    <Compile Include="PainelPedidos.cs" />
+    <Compile Include="PainelPedidoDetalhe.cs" />
+    <Compile Include="PainelReservas.cs" />
+    <Compile Include="PainelRelatorios.cs" />
+    <Compile Include="PainelFuncionarios.cs" />
+    <Compile Include="Servicos.cs" />
+    <Compile Include="Tema.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">

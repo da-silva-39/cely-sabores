@@ -1,3 +1,4 @@
+using System;
 using System.Data;
 using System.Data.SqlClient;
 using CelySabores.Data.Connections;
@@ -49,6 +50,38 @@ namespace CelySabores.Data.Database
                 adapter.Fill(table);
                 return table;
             }
+        }
+
+        public T ExecutarEmTransacao<T>(Func<SqlConnection, SqlCommand, T> acao)
+        {
+            using (var connection = CreateConnection())
+            using (var command = CriarComando(connection, "SELECT 1", null))
+            {
+                connection.Open();
+                var transacao = connection.BeginTransaction();
+                command.Transaction = transacao;
+
+                try
+                {
+                    var resultado = acao(connection, command);
+                    transacao.Commit();
+                    return resultado;
+                }
+                catch
+                {
+                    transacao.Rollback();
+                    throw;
+                }
+            }
+        }
+
+        public void ExecutarEmTransacao(Action<SqlConnection, SqlCommand> acao)
+        {
+            ExecutarEmTransacao<object>((connection, command) =>
+            {
+                acao(connection, command);
+                return null;
+            });
         }
 
         private SqlCommand CriarComando(SqlConnection connection, string sql, SqlParameter[] parameters)

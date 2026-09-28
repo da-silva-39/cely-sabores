@@ -10,5 +10,10 @@ namespace CelySabores.Models.Entities
         public EstadoMesa Estado { get; set; }
         public bool Ativo { get; set; }
         public string Observacoes { get; set; }
+
+        public override string ToString()
+        {
+            return "Mesa " + Numero;
+        }
     }
 }

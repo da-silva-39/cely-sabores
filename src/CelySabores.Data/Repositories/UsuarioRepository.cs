@@ -117,7 +117,8 @@ namespace CelySabores.Data.Repositories
                 Ativo = Leitor.Bool(linha, "Ativo"),
                 DataCriacao = Leitor.DateTime(linha, "DataCriacao"),
                 UltimoLogin = Leitor.DateTimeNulo(linha, "UltimoLogin"),
-                NomeFuncionario = Leitor.String(linha, "NomeFuncionario")
+                NomeFuncionario = Leitor.String(linha, "NomeFuncionario"),
+                Cargo = Leitor.String(linha, "Cargo")
             };
         }
     }

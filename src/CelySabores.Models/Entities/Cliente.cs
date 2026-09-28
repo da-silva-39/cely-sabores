@@ -11,5 +11,10 @@ namespace CelySabores.Models.Entities
         public string Endereco { get; set; }
         public string Observacoes { get; set; }
         public DateTime DataCadastro { get; set; }
+
+        public override string ToString()
+        {
+            return string.IsNullOrWhiteSpace(NomeCompleto) ? "(cliente sem nome)" : NomeCompleto;
+        }
     }
 }
