@@ -7,71 +7,28 @@ using CelySabores.Models.Dtos;
 
 namespace Cely_Sabores
 {
-    public abstract class PainelBase : Panel
+    // UserControl (e nao Panel) para o Visual Studio abrir este painel no
+    // designer visual: o designer so edita Forms e UserControls.
+    // Todo o layout vive em PainelBase.Designer.cs.
+    // Nao e abstract: o designer do Visual Studio recusa abrir classes
+    // abstractas. Recarregar() e virtual para os paineis filhos fazerem override.
+    public partial class PainelBase : UserControl
     {
-        private readonly Panel _cabecalho;
-        private readonly FlowLayoutPanel _acoes;
-        private readonly Label _titulo;
-        private readonly Panel _conteudo;
-        private readonly Label _status;
-
-        protected PainelBase(string titulo, string subtitulo)
+        // usado pelo designer quando instancia o painel
+        public PainelBase()
         {
-            BackColor = Tema.Fundo;
-            Padding = new Padding(0);
-
-            _cabecalho = new Panel
-            {
-                Dock = DockStyle.Top,
-                Height = 78,
-                BackColor = Tema.Fundo
-            };
-
-            _titulo = new Label
-            {
-                Text = titulo,
-                AutoSize = true,
-                ForeColor = Tema.Texto,
-                Font = new Font("Segoe UI", 17F, FontStyle.Bold),
-                Location = new Point(0, 0)
-            };
-            _cabecalho.Controls.Add(_titulo);
-
-            _status = new Label
-            {
-                Text = subtitulo,
-                AutoSize = true,
-                ForeColor = Tema.TextoSuave,
-                Font = new Font("Segoe UI", 9F),
-                Location = new Point(0, 30)
-            };
-            _cabecalho.Controls.Add(_status);
-
-            _acoes = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Right,
-                Width = 560,
-                FlowDirection = FlowDirection.RightToLeft,
-                WrapContents = false,
-                Padding = new Padding(0, 4, 0, 0),
-                BackColor = Tema.Fundo
-            };
-            _cabecalho.Controls.Add(_acoes);
-
-            _conteudo = new Panel
-            {
-                Dock = DockStyle.Fill,
-                BackColor = Tema.Fundo,
-                Padding = new Padding(0, 8, 0, 0)
-            };
-
-            Controls.Add(_conteudo);
-            Controls.Add(_cabecalho);
+            InitializeComponent();
         }
 
-        protected Panel Conteudo
+        protected PainelBase(string titulo, string subtitulo)
+            : this()
         {
-            get { return _conteudo; }
+            _titulo.Text = titulo;
+            _status.Text = subtitulo;
+
+            // o painel so recebe a largura final quando o shell o encaixa
+            SizeChanged += (s, ev) => AjustarCabecalho();
+            AjustarCabecalho();
         }
 
         protected SessaoUsuario Sessao
@@ -89,11 +46,38 @@ namespace Cely_Sabores
             _status.Text = texto;
         }
 
+        protected void DefinirTitulo(string texto)
+        {
+            _titulo.Text = texto;
+        }
+
+        private void AjustarCabecalho()
+        {
+            if (ClientSize.Width <= 0)
+            {
+                return;
+            }
+
+            // a barra nunca invade o titulo, mas tampouco encolhe tanto que
+            // obrigue os botoes a mais linhas do que o necessario
+            var largura = Math.Max(360, Math.Min(880, ClientSize.Width * 62 / 100));
+            _acoes.Width = largura;
+
+            var paraOTitulo = Math.Max(120, ClientSize.Width - largura - 12);
+            _titulo.MaximumSize = new Size(paraOTitulo, 0);
+            _status.MaximumSize = new Size(paraOTitulo, 0);
+
+            // o cabecalho cresce para accomodar as linhas extra de botoes
+            var altura = _acoes.GetPreferredSize(new Size(largura - 2, 0)).Height;
+            _cabecalho.Height = Math.Max(78, altura + 10);
+        }
+
         protected Button AdicionarAcao(string texto, bool primario, Action acao)
         {
             var botao = Tema.Botao(texto, primario);
             botao.Click += (s, ev) => Executar(acao);
             _acoes.Controls.Add(botao);
+            AjustarCabecalho();
             return botao;
         }
 
@@ -128,6 +112,8 @@ namespace Cely_Sabores
             return MessageBox.Show(mensagem, "Cely Sabores", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
         }
 
-        public abstract void Recarregar();
+        public virtual void Recarregar()
+        {
+        }
     }
 }

@@ -56,6 +56,16 @@ namespace Cely_Sabores
                 new ClienteRepository(NovoDb()));
         }
 
+        public static ReciboService Recibo()
+        {
+            return new ReciboService(new PedidoRepository(NovoDb()));
+        }
+
+        public static EstoqueService Estoque()
+        {
+            return new EstoqueService(new EstoqueRepository(NovoDb()), new CardapioRepository(NovoDb()));
+        }
+
         public static RelatorioService Relatorios()
         {
             return new RelatorioService(new RelatorioRepository(NovoDb()));

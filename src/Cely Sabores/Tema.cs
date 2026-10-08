@@ -27,28 +27,6 @@ namespace Cely_Sabores
             return valor.ToString("dd/MM/yyyy HH:mm");
         }
 
-        public static Label Titulo(string texto, float tamanho, bool forte)
-        {
-            return new Label
-            {
-                Text = texto,
-                AutoSize = true,
-                ForeColor = Texto,
-                Font = new Font("Segoe UI", tamanho, forte ? FontStyle.Bold : FontStyle.Regular)
-            };
-        }
-
-        public static Label Subtitulo(string texto)
-        {
-            return new Label
-            {
-                Text = texto,
-                AutoSize = true,
-                ForeColor = TextoSuave,
-                Font = new Font("Segoe UI", 9F)
-            };
-        }
-
         public static Button Botao(string texto, bool primario)
         {
             var botao = new Button
@@ -100,51 +78,6 @@ namespace Cely_Sabores
             painel.Controls.Add(lblTitulo);
             painel.Controls.Add(lblValor);
             return painel;
-        }
-
-        public static DataGridView Tabela(params string[] colunas)
-        {
-            var tabela = new DataGridView
-            {
-                AutoGenerateColumns = false,
-                Dock = DockStyle.Fill,
-                BackgroundColor = Color.White,
-                BorderStyle = BorderStyle.None,
-                RowHeadersVisible = false,
-                AllowUserToAddRows = false,
-                AllowUserToDeleteRows = false,
-                AllowUserToResizeRows = false,
-                ReadOnly = true,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                MultiSelect = false,
-                EnableHeadersVisualStyles = false,
-                ColumnHeadersHeight = 34,
-                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                Font = new Font("Segoe UI", 10F)
-            };
-            tabela.ColumnHeadersDefaultCellStyle.BackColor = Laranja;
-            tabela.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-            tabela.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            tabela.DefaultCellStyle.BackColor = Color.White;
-            tabela.DefaultCellStyle.SelectionBackColor = CartaoSelecao;
-            tabela.DefaultCellStyle.SelectionForeColor = Texto;
-            tabela.DefaultCellStyle.Padding = new Padding(4, 0, 4, 0);
-            tabela.GridColor = Borda;
-
-            foreach (var coluna in colunas)
-            {
-                tabela.Columns.Add(coluna, coluna);
-            }
-
-            return tabela;
-        }
-
-        public static void Centralizar(System.Windows.Forms.Control pai, Control filho, int altura)
-        {
-            filho.Dock = DockStyle.Top;
-            filho.Height = altura;
-            pai.Controls.Add(filho);
         }
     }
 }

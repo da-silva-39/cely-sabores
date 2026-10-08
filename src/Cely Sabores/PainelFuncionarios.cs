@@ -1,53 +1,31 @@
 using System;
-using System.Drawing;
+using System.ComponentModel;
 using System.Windows.Forms;
 using CelySabores.Business.Services;
 using CelySabores.Models.Entities;
 
 namespace Cely_Sabores
 {
-    public sealed class PainelFuncionarios : PainelBase
+    // O layout esta em PainelFuncionarios.Designer.cs, para se poder ajustar
+    // tudo no designer do Visual Studio. Aqui fica apenas a logica.
+    public sealed partial class PainelFuncionarios : PainelBase
     {
         private readonly FuncionarioService _funcionarioService;
-        private readonly DataGridView _tabela;
-        private readonly CheckBox _mostrarInactivos;
+
+        // Construtor usado pelo designer: nao toca na base de dados.
+        public PainelFuncionarios()
+            : base("Funcionários", "Carregando...")
+        {
+            InitializeComponent();
+        }
 
         public PainelFuncionarios(FuncionarioService funcionarioService)
-            : base("Funcionários", "Carregando...")
+            : this()
         {
             _funcionarioService = funcionarioService;
 
-            _mostrarInactivos = new CheckBox
-            {
-                Text = "Mostrar inactivos",
-                AutoSize = true,
-                ForeColor = Tema.Texto,
-                Font = new Font("Segoe UI", 9.5F),
-                Margin = new Padding(0, 7, 0, 0)
-            };
-            _mostrarInactivos.CheckedChanged += (s, ev) => Executar(Recarregar);
-
-            var filtros = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Top,
-                Height = 42,
-                FlowDirection = FlowDirection.LeftToRight,
-                WrapContents = false,
-                BackColor = Tema.Fundo
-            };
-            filtros.Controls.Add(_mostrarInactivos);
-
-            _tabela = Tema.Tabela("Nome", "Cargo", "Telefone", "E-mail", "Desde", "Ativo");
-            _tabela.Columns[0].FillWeight = 28;
-            _tabela.Columns[1].FillWeight = 18;
-            _tabela.Columns[2].FillWeight = 14;
-            _tabela.Columns[3].FillWeight = 22;
-            _tabela.Columns[4].FillWeight = 10;
-            _tabela.Columns[5].FillWeight = 8;
-            _tabela.CellDoubleClick += (s, ev) => Executar(EditarSelecionado);
-
-            Conteudo.Controls.Add(_tabela);
-            Conteudo.Controls.Add(filtros);
+            chkInactivos.CheckedChanged += (s, ev) => Executar(Recarregar);
+            dgvFuncionarios.CellDoubleClick += (s, ev) => Executar(EditarSelecionado);
 
             AdicionarAcao("Actualizar", false, Recarregar);
             AdicionarAcao("Novo funcionário", true, Novo);
@@ -55,17 +33,21 @@ namespace Cely_Sabores
             AdicionarAcao("Desativar", false, () => AlterarAtivo(false));
             AdicionarAcao("Ativar", false, () => AlterarAtivo(true));
 
-            Recarregar();
+            // no designer nao se toca na base de dados
+            if (LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+            {
+                Recarregar();
+            }
         }
 
         public override void Recarregar()
         {
-            var funcionarios = _funcionarioService.Listar(!_mostrarInactivos.Checked);
-            _tabela.Rows.Clear();
+            var funcionarios = _funcionarioService.Listar(!chkInactivos.Checked);
+            dgvFuncionarios.Rows.Clear();
 
             foreach (var funcionario in funcionarios)
             {
-                var indice = _tabela.Rows.Add(
+                var indice = dgvFuncionarios.Rows.Add(
                     funcionario.NomeCompleto,
                     funcionario.Cargo,
                     funcionario.Telefone ?? "",
@@ -73,27 +55,27 @@ namespace Cely_Sabores
                     Tema.DataHora(funcionario.DataCadastro).Substring(0, 10),
                     funcionario.Ativo ? "Sim" : "Não");
 
-                _tabela.Rows[indice].Tag = funcionario;
+                dgvFuncionarios.Rows[indice].Tag = funcionario;
 
                 if (!funcionario.Ativo)
                 {
-                    _tabela.Rows[indice].DefaultCellStyle.ForeColor = Tema.TextoSuave;
+                    dgvFuncionarios.Rows[indice].DefaultCellStyle.ForeColor = Tema.TextoSuave;
                 }
             }
 
             DefinirStatus(funcionarios.Count + " funcionário(s)"
-                + (_mostrarInactivos.Checked ? "" : " activo(s)"));
+                + (chkInactivos.Checked ? "" : " activo(s)"));
         }
 
         private Funcionario Selecionado()
         {
-            if (_tabela.SelectedRows.Count == 0)
+            if (dgvFuncionarios.SelectedRows.Count == 0)
             {
                 Aviso("Seleccione um funcionário.", MessageBoxIcon.Information);
                 return null;
             }
 
-            return _tabela.SelectedRows[0].Tag as Funcionario;
+            return dgvFuncionarios.SelectedRows[0].Tag as Funcionario;
         }
 
         private void Novo()

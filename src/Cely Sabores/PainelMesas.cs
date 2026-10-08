@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
+using System.ComponentModel;
 using System.Windows.Forms;
 using CelySabores.Business.Services;
 using CelySabores.Models.Entities;
@@ -8,39 +8,26 @@ using CelySabores.Models.Enums;
 
 namespace Cely_Sabores
 {
-    public sealed class PainelMesas : PainelBase
+    // O layout esta em PainelMesas.Designer.cs, para se poder ajustar tudo
+    // no designer do Visual Studio. Aqui fica apenas a logica.
+    public sealed partial class PainelMesas : PainelBase
     {
         private readonly MesaService _mesaService;
-        private readonly DataGridView _tabela;
-        private readonly CheckBox _mostrarInativas;
 
-        public PainelMesas(MesaService mesaService) : base("Mesas", "Carregando...")
+        // Construtor usado pelo designer: nao toca na base de dados.
+        public PainelMesas()
+            : base("Mesas", "Carregando...")
+        {
+            InitializeComponent();
+        }
+
+        public PainelMesas(MesaService mesaService)
+            : this()
         {
             _mesaService = mesaService;
 
-            _tabela = Tema.Tabela("Número", "Capacidade", "Estado", "Observações");
-            _tabela.Columns[0].FillWeight = 18;
-            _tabela.Columns[1].FillWeight = 18;
-            _tabela.Columns[2].FillWeight = 26;
-            _tabela.Columns[3].FillWeight = 38;
-            _tabela.CellDoubleClick += (s, ev) => Executar(EditarSelecionada);
-
-            _mostrarInativas = new CheckBox
-            {
-                Text = "Mostrar inativas",
-                AutoSize = true,
-                ForeColor = Tema.TextoSuave,
-                Font = new Font("Segoe UI", 9F),
-                Margin = new Padding(0, 10, 12, 0)
-            };
-            _mostrarInativas.CheckedChanged += (s, ev) => Executar(Recarregar);
-
-            Conteudo.Controls.Add(_tabela);
-            Conteudo.Controls.Add(_mostrarInativas);
-            _mostrarInativas.BringToFront();
-            _mostrarInativas.Dock = DockStyle.Top;
-            _mostrarInativas.Height = 34;
-            _mostrarInativas.Padding = new Padding(0, 8, 0, 0);
+            dgvMesas.CellDoubleClick += (s, ev) => Executar(EditarSelecionada);
+            chkMostrarInativas.CheckedChanged += (s, ev) => Executar(Recarregar);
 
             AdicionarAcao("Actualizar", false, Recarregar);
             AdicionarAcao("Nova mesa", true, Nova);
@@ -48,23 +35,27 @@ namespace Cely_Sabores
             AdicionarAcao("Alterar estado", false, AlterarEstado);
             AdicionarAcao("Activar / Desactivar", false, AlternarAtivo);
 
-            Recarregar();
+            // no designer nao se toca na base de dados
+            if (LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+            {
+                Recarregar();
+            }
         }
 
         public override void Recarregar()
         {
-            var mesas = _mesaService.Listar(_mostrarInativas.Checked);
-            _tabela.Rows.Clear();
+            var mesas = _mesaService.Listar(chkMostrarInativas.Checked);
+            dgvMesas.Rows.Clear();
 
             foreach (var mesa in mesas)
             {
-                var indice = _tabela.Rows.Add(
+                var indice = dgvMesas.Rows.Add(
                     mesa.Numero,
                     mesa.Capacidade,
                     DescreverEstado(mesa.Estado),
                     mesa.Ativo ? (mesa.Observacoes ?? "") : "(inactiva) " + (mesa.Observacoes ?? ""));
 
-                _tabela.Rows[indice].Tag = mesa;
+                dgvMesas.Rows[indice].Tag = mesa;
             }
 
             DefinirStatus(mesas.Count + " mesa(s) - " + Contar(mesas, EstadoMesa.Livre) + " livre(s), "
@@ -100,13 +91,13 @@ namespace Cely_Sabores
 
         private Mesa Selecionada()
         {
-            if (_tabela.SelectedRows.Count == 0)
+            if (dgvMesas.SelectedRows.Count == 0)
             {
                 Aviso("Seleccione uma mesa.", MessageBoxIcon.Information);
                 return null;
             }
 
-            return _tabela.SelectedRows[0].Tag as Mesa;
+            return dgvMesas.SelectedRows[0].Tag as Mesa;
         }
 
         private void Nova()

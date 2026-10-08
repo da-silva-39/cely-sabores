@@ -1,6 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Drawing;
+using System.ComponentModel;
 using System.Windows.Forms;
 using CelySabores.Business.Exceptions;
 using CelySabores.Business.Services;
@@ -9,133 +8,55 @@ using CelySabores.Models.Enums;
 
 namespace Cely_Sabores
 {
-    public sealed class PainelPedidoDetalhe : Form
+    // O layout esta em PainelPedidoDetalhe.Designer.cs, para se poder ajustar
+    // tudo no designer do Visual Studio. Aqui fica apenas a logica.
+    public sealed partial class PainelPedidoDetalhe : Form
     {
         private readonly PedidoService _pedidoService;
+        private readonly ReciboService _reciboService;
         private readonly int _pedidoId;
-        private readonly DataGridView _cardapio;
-        private readonly DataGridView _itens;
-        private readonly Label _cabecalho;
-        private readonly Label _total;
 
-        public PainelPedidoDetalhe(PedidoService pedidoService, Pedido pedido)
+        // Construtor usado pelo designer: nao toca na base de dados.
+        public PainelPedidoDetalhe()
         {
-            _pedidoService = pedidoService;
-            _pedidoId = pedido.Id;
-
-            Text = "Pedido " + pedido.Id + " - Mesa " + pedido.MesaNumero;
-            StartPosition = FormStartPosition.CenterParent;
-            ClientSize = new Size(1080, 660);
-            MinimumSize = new Size(940, 600);
-            BackColor = Tema.Fundo;
-            Font = new Font("Segoe UI", 10F);
-            ShowInTaskbar = false;
-
-            _cabecalho = new Label
-            {
-                Dock = DockStyle.Top,
-                Height = 56,
-                ForeColor = Tema.Texto,
-                Font = new Font("Segoe UI", 13F, FontStyle.Bold),
-                TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(0, 0, 0, 0)
-            };
-
-            // ---- cardapio (esquerda) ----
-            _cardapio = Tema.Tabela("Prato", "Preço");
-            _cardapio.Columns[0].FillWeight = 70;
-            _cardapio.Columns[1].FillWeight = 30;
-            _cardapio.Columns[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            _cardapio.CellDoubleClick += (s, ev) => Executar(AdicionarPratoSelecionado);
-
-            var lblCardapio = Tema.Titulo("Cardápio (duplo clique para adicionar)", 11F, true);
-            lblCardapio.Dock = DockStyle.Top;
-            lblCardapio.Height = 26;
-
-            var esquerda = new Panel { Dock = DockStyle.Fill, Padding = new Padding(0, 0, 10, 0) };
-            esquerda.Controls.Add(_cardapio);
-            esquerda.Controls.Add(lblCardapio);
-
-            // ---- itens (direita) ----
-            _itens = Tema.Tabela("Item", "Qtd", "P. Unit.", "Subtotal");
-            _itens.Columns[0].FillWeight = 50;
-            _itens.Columns[1].FillWeight = 12;
-            _itens.Columns[2].FillWeight = 18;
-            _itens.Columns[3].FillWeight = 20;
-            _itens.Columns[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            _itens.Columns[2].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            _itens.Columns[3].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-
-            var lblItens = Tema.Titulo("Itens do pedido", 11F, true);
-            lblItens.Dock = DockStyle.Top;
-            lblItens.Height = 26;
-
-            _total = new Label
-            {
-                Dock = DockStyle.Bottom,
-                Height = 34,
-                TextAlign = ContentAlignment.MiddleRight,
-                ForeColor = Tema.LaranjaEscura,
-                Font = new Font("Segoe UI", 14F, FontStyle.Bold)
-            };
-
-            var direita = new Panel { Dock = DockStyle.Fill, Padding = new Padding(10, 0, 0, 0) };
-            direita.Controls.Add(_itens);
-            direita.Controls.Add(lblItens);
-            direita.Controls.Add(_total);
-
-            var corpo = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                ColumnCount = 2,
-                RowCount = 1,
-                BackColor = Tema.Fundo
-            };
-            corpo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45F));
-            corpo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55F));
-            corpo.Controls.Add(esquerda, 0, 0);
-            corpo.Controls.Add(direita, 1, 0);
-
-            // ---- barra de accoes ----
-            var barra = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Bottom,
-                Height = 56,
-                FlowDirection = FlowDirection.RightToLeft,
-                WrapContents = false,
-                BackColor = Color.White,
-                Padding = new Padding(10, 10, 10, 0)
-            };
-
-            var btnPagar = Tema.Botao("Registar pagamento", true);
-            btnPagar.Click += (s, ev) => Executar(Pagar);
-            var btnCancelar = Tema.Botao("Cancelar pedido", false);
-            btnCancelar.Click += (s, ev) => Executar(Cancelar);
-            var btnQtd = Tema.Botao("+/- quantidade", false);
-            btnQtd.Click += (s, ev) => Executar(AlterarQuantidade);
-            var btnRemover = Tema.Botao("Remover item", false);
-            btnRemover.Click += (s, ev) => Executar(RemoverItem);
-            var btnAdd = Tema.Botao("Adicionar item", false);
-            btnAdd.Click += (s, ev) => Executar(AdicionarPratoSelecionado);
-            var btnFechar = Tema.Botao("Fechar", false);
-            btnFechar.Click += (s, ev) => Close();
-
-            barra.Controls.Add(btnFechar);
-            barra.Controls.Add(btnPagar);
-            barra.Controls.Add(btnCancelar);
-            barra.Controls.Add(btnQtd);
-            barra.Controls.Add(btnRemover);
-            barra.Controls.Add(btnAdd);
-
-            Controls.Add(corpo);
-            Controls.Add(_cabecalho);
-            Controls.Add(barra);
-
-            Recarregar();
+            InitializeComponent();
         }
 
+        public PainelPedidoDetalhe(PedidoService pedidoService, ReciboService reciboService, Pedido pedido)
+            : this()
+        {
+            _pedidoService = pedidoService;
+            _reciboService = reciboService;
+            _pedidoId = pedido == null ? 0 : pedido.Id;
+
+            Inicializar();
+
+            Text = "Pedido " + _pedidoId + " - Mesa " + pedido.MesaNumero;
+
+            // no designer nao se toca na base de dados
+            if (_pedidoService != null && LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+            {
+                Recarregar();
+            }
+        }
+
+        private void Inicializar()
+        {
+            dgvCardapio.CellDoubleClick += (s, ev) => Executar(AdicionarPratoSelecionado);
+
+            btnAdicionar.Click += (s, ev) => Executar(AdicionarPratoSelecionado);
+            btnRemover.Click += (s, ev) => Executar(RemoverItem);
+            btnQuantidade.Click += (s, ev) => Executar(AlterarQuantidade);
+            btnCancelar.Click += (s, ev) => Executar(Cancelar);
+            btnPagar.Click += (s, ev) => Executar(Pagar);
+            btnRecibo.Click += (s, ev) => Executar(MostrarRecibo);
+            btnFechar.Click += (s, ev) => Fechar();
+        }
+
+        // mesmo tratamento de erros que os paineis usam nas accoes
         private void Executar(Action acao)
         {
+            Cursor = Cursors.WaitCursor;
             try
             {
                 acao();
@@ -146,8 +67,11 @@ namespace Cely_Sabores
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ocorreu um erro: " + ex.Message, "Cely Sabores",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Ocorreu um erro: " + ex.Message, "Cely Sabores", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                Cursor = Cursors.Default;
             }
         }
 
@@ -156,29 +80,37 @@ namespace Cely_Sabores
             var pedido = _pedidoService.ObterPorId(_pedidoId);
             var itens = _pedidoService.ListarItens(_pedidoId);
 
-            _cabecalho.Text = "Pedido " + pedido.Id + "   |   Mesa " + pedido.MesaNumero
+            cabecalho.Text = "Pedido " + pedido.Id + "   |   Mesa " + pedido.MesaNumero
                 + "   |   " + DescreverEstado(pedido.Estado)
                 + "   |   " + (string.IsNullOrEmpty(pedido.ClienteNome) ? "Cliente: balcão" : "Cliente: " + pedido.ClienteNome)
                 + "   |   Aberto por " + pedido.FuncionarioNome
                 + "   |   " + Tema.DataHora(pedido.DataAbertura);
 
-            _itens.Rows.Clear();
+            dgvItens.Rows.Clear();
             foreach (var item in itens)
             {
-                _itens.Rows.Add(
+                dgvItens.Rows.Add(
                     item.PratoNome + (string.IsNullOrEmpty(item.Observacao) ? "" : "  (" + item.Observacao + ")"),
                     item.Quantidade,
                     Tema.Moeda(item.PrecoUnitario),
                     Tema.Moeda(item.Subtotal));
             }
 
-            _total.Text = "Total: " + Tema.Moeda(pedido.ValorTotal);
+            lblTotal.Text = "Total: " + Tema.Moeda(pedido.ValorTotal);
 
-            _cardapio.Rows.Clear();
+            // o botao de recibo existe apenas durante o atendimento: e a
+            // emissao do recibo que o funcionario acabou de fazer. Reabrir um
+            // pedido antigo nao volta a dar recibo a ninguem — para isso o
+            // gerente usa "Reimprimir recibo" no historico.
+            // Depois do pagamento o recibo continua a poder ser emitido: e o
+            // proprio Pagar() que o mostra, porque a partir dai o botao some.
+            btnRecibo.Visible = pedido.Estado == EstadoPedido.Aberto;
+
+            dgvCardapio.Rows.Clear();
             foreach (var prato in _pedidoService.ListarPratosDisponiveis())
             {
-                var indice = _cardapio.Rows.Add(prato.Nome, Tema.Moeda(prato.Preco));
-                _cardapio.Rows[indice].Tag = prato;
+                var indice = dgvCardapio.Rows.Add(prato.Nome, Tema.Moeda(prato.Preco));
+                dgvCardapio.Rows[indice].Tag = prato;
             }
         }
 
@@ -193,19 +125,24 @@ namespace Cely_Sabores
             }
         }
 
+        private void Fechar()
+        {
+            Close();
+        }
+
         private void AdicionarPratoSelecionado()
         {
-            if (_cardapio.SelectedRows.Count == 0)
+            if (dgvCardapio.SelectedRows.Count == 0)
             {
                 MessageBox.Show("Seleccione um prato do cardápio.", "Cely Sabores",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            var prato = _cardapio.SelectedRows[0].Tag as Prato;
+            var prato = dgvCardapio.SelectedRows[0].Tag as Prato;
             using (var dialogo = new DialogoQuantidade(prato))
             {
-                if (dialogo.ShowDialog(this) != DialogResult.OK)
+                if (dialogo.ShowDialog(FindForm()) != DialogResult.OK)
                 {
                     return;
                 }
@@ -226,7 +163,7 @@ namespace Cely_Sabores
 
             using (var dialogo = new DialogoQuantidade(null, item.Quantidade))
             {
-                if (dialogo.ShowDialog(this) != DialogResult.OK)
+                if (dialogo.ShowDialog(FindForm()) != DialogResult.OK)
                 {
                     return;
                 }
@@ -264,35 +201,61 @@ namespace Cely_Sabores
 
         private ItemPedido ItemSeleccionado()
         {
-            if (_itens.SelectedRows.Count == 0)
+            if (dgvItens.SelectedRows.Count == 0)
             {
                 MessageBox.Show("Seleccione um item do pedido.", "Cely Sabores",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return null;
             }
 
-            var linha = _itens.SelectedRows[0].Index;
+            var linha = dgvItens.SelectedRows[0].Index;
             var itens = _pedidoService.ListarItens(_pedidoId);
             return linha >= 0 && linha < itens.Count ? itens[linha] : null;
+        }
+
+        private void MostrarRecibo()
+        {
+            if (_reciboService == null)
+            {
+                return;
+            }
+
+            // o funcionario emite o recibo do atendimento que acabou de fazer.
+            // A reimpressao de um recibo antigo e um pedido a parte, no historico
+            // de pedidos, e so o gerente a pode fazer.
+            using (var formulario = new FormularioRecibo(_reciboService.Obter(_pedidoId)))
+            {
+                formulario.ShowDialog(FindForm());
+            }
         }
 
         private void Pagar()
         {
             var pedido = _pedidoService.ObterPorId(_pedidoId);
+
+            decimal valorRecebido;
             using (var dialogo = new DialogoPagamento(pedido))
             {
-                if (dialogo.ShowDialog(this) != DialogResult.OK)
+                if (dialogo.ShowDialog(FindForm()) != DialogResult.OK)
                 {
                     return;
                 }
 
-                var pagamento = _pedidoService.RegistarPagamento(_pedidoId, dialogo.ValorRecebido);
-                MessageBox.Show(
-                    "Pagamento registado. Troco: " + Tema.Moeda(pagamento.Troco),
-                    "Cely Sabores", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                valorRecebido = dialogo.ValorRecebido;
             }
 
+            var pagamento = _pedidoService.RegistarPagamento(_pedidoId, valorRecebido);
             Recarregar();
+
+            var resposta = MessageBox.Show(
+                "Pagamento registado. Troco: " + Tema.Moeda(pagamento.Troco)
+                + Environment.NewLine + "Deseja imprimir o recibo?",
+                "Cely Sabores", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+
+            if (resposta == DialogResult.Yes)
+            {
+                MostrarRecibo();
+            }
         }
 
         private void Cancelar()

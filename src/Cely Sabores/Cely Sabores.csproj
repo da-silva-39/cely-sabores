@@ -33,7 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
+    <Reference Include="System">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.dll</HintPath>
+    </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -61,46 +63,169 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Form1.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
-    </Compile>
     <Compile Include="FormularioLogin.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormularioLogin.Designer.cs">
+      <DependentUpon>FormularioLogin.cs</DependentUpon>
     </Compile>
     <Compile Include="FormularioShell.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Dialogos.cs" />
-    <Compile Include="DialogosCardapio.cs" />
-    <Compile Include="DialogosPedido.cs" />
-    <Compile Include="DialogosReserva.cs" />
-    <Compile Include="DialogosFuncionario.cs" />
-    <Compile Include="PainelBase.cs" />
-    <Compile Include="PainelDashboard.cs" />
-    <Compile Include="PainelMesas.cs" />
-    <Compile Include="PainelCardapio.cs" />
-    <Compile Include="PainelClientes.cs" />
-    <Compile Include="PainelPedidos.cs" />
-    <Compile Include="PainelPedidoDetalhe.cs" />
-    <Compile Include="PainelReservas.cs" />
-    <Compile Include="PainelRelatorios.cs" />
-    <Compile Include="PainelFuncionarios.cs" />
+    <Compile Include="FormularioShell.Designer.cs">
+      <DependentUpon>FormularioShell.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogos.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DialogoMesa.Designer.cs">
+      <DependentUpon>Dialogos.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DialogoEstadoMesa.Designer.cs">
+      <DependentUpon>Dialogos.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DialogosCardapio.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DialogoPrato.Designer.cs">
+      <DependentUpon>DialogosCardapio.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DialogoCliente.Designer.cs">
+      <DependentUpon>DialogosCardapio.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DialogosPedido.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DialogoAbrirPedido.Designer.cs">
+      <DependentUpon>DialogosPedido.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DialogoQuantidade.Designer.cs">
+      <DependentUpon>DialogosPedido.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DialogoPagamento.Designer.cs">
+      <DependentUpon>DialogosPedido.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DialogosReserva.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DialogoReserva.Designer.cs">
+      <DependentUpon>DialogosReserva.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DialogosFuncionario.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DialogoFuncionario.Designer.cs">
+      <DependentUpon>DialogosFuncionario.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PainelBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PainelBase.Designer.cs">
+      <DependentUpon>PainelBase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PainelDashboardGerente.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PainelDashboardGerente.Designer.cs">
+      <DependentUpon>PainelDashboardGerente.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PainelDashboardFuncionario.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PainelDashboardFuncionario.Designer.cs">
+      <DependentUpon>PainelDashboardFuncionario.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PainelMesas.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PainelMesas.Designer.cs">
+      <DependentUpon>PainelMesas.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PainelCardapio.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PainelCardapio.Designer.cs">
+      <DependentUpon>PainelCardapio.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PainelClientes.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PainelClientes.Designer.cs">
+      <DependentUpon>PainelClientes.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PainelPedidos.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PainelPedidos.Designer.cs">
+      <DependentUpon>PainelPedidos.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PainelPedidoDetalhe.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PainelPedidoDetalhe.Designer.cs">
+      <DependentUpon>PainelPedidoDetalhe.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ReciboImpressao.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FormularioRecibo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormularioRecibo.Designer.cs">
+      <DependentUpon>FormularioRecibo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PainelEstoque.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PainelEstoque.Designer.cs">
+      <DependentUpon>PainelEstoque.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DialogosEstoque.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DialogoIngrediente.Designer.cs">
+      <DependentUpon>DialogosEstoque.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DialogoMovimentoEstoque.Designer.cs">
+      <DependentUpon>DialogosEstoque.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DialogosReceitaEstoque.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DialogoEscolherIngrediente.Designer.cs">
+      <DependentUpon>DialogosReceitaEstoque.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DialogoQuantidadeReceita.Designer.cs">
+      <DependentUpon>DialogosReceitaEstoque.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DialogoHistoricoEstoque.Designer.cs">
+      <DependentUpon>DialogosReceitaEstoque.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DialogoReceitaPrato.Designer.cs">
+      <DependentUpon>DialogosReceitaEstoque.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PainelReservas.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PainelReservas.Designer.cs">
+      <DependentUpon>PainelReservas.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PainelRelatorios.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PainelRelatorios.Designer.cs">
+      <DependentUpon>PainelRelatorios.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PainelFuncionarios.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PainelFuncionarios.Designer.cs">
+      <DependentUpon>PainelFuncionarios.cs</DependentUpon>
+    </Compile>
     <Compile Include="Servicos.cs" />
     <Compile Include="Tema.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -113,6 +238,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DialogosReserva.resx">
+      <DependentUpon>DialogosReserva.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,57 +1,32 @@
-using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using CelySabores.Business.Exceptions;
 using CelySabores.Business.Services;
 using CelySabores.Models.Dtos;
 
 namespace Cely_Sabores
 {
-    public sealed class FormularioShell : Form
+    // O layout esta em FormularioShell.Designer.cs, para se poder ajustar tudo
+    // no designer do Visual Studio. Aqui fica apenas a logica: os botoes do
+    // menu dependem da sessao e das permissoes, por isso continuam a ser
+    // criados em runtime.
+    public sealed partial class FormularioShell : Form
     {
         private readonly SessaoUsuario _sessao;
-        private readonly Panel _painelMenu;
-        private readonly Panel _painelConteudo;
-        private readonly FlowLayoutPanel _menuItens;
         private readonly Dictionary<string, Button> _botoesMenu = new Dictionary<string, Button>();
         private string _telaAtual;
 
+        // Construtor usado pelo designer: nao mostra nenhum painel.
+        public FormularioShell()
+        {
+            InitializeComponent();
+        }
+
         public FormularioShell(SessaoUsuario sessao)
+            : this()
         {
             _sessao = sessao;
-
-            Text = "Cely Sabores";
-            StartPosition = FormStartPosition.CenterScreen;
-            ClientSize = new Size(1180, 720);
-            MinimumSize = new Size(1024, 640);
-            BackColor = Tema.Fundo;
-            Font = new Font("Segoe UI", 10F);
-
-            _painelMenu = new Panel
-            {
-                Dock = DockStyle.Left,
-                Width = 224,
-                BackColor = Tema.Menu
-            };
-
-            _menuItens = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                FlowDirection = FlowDirection.TopDown,
-                WrapContents = false,
-                BackColor = Tema.Menu,
-                Padding = new Padding(10, 0, 10, 0)
-            };
-
-            _painelConteudo = new Panel
-            {
-                Dock = DockStyle.Fill,
-                Padding = new Padding(22),
-                BackColor = Tema.Fundo
-            };
-
-            Controls.Add(_painelConteudo);
-            Controls.Add(_painelMenu);
 
             MontarMenu();
             IrPara("Painel");
@@ -59,46 +34,9 @@ namespace Cely_Sabores
 
         private void MontarMenu()
         {
-            var lblTitulo = new Label
-            {
-                Text = "Cely Sabores",
-                Dock = DockStyle.Top,
-                Height = 54,
-                ForeColor = Color.White,
-                Font = new Font("Segoe UI", 15F, FontStyle.Bold),
-                TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(18, 0, 0, 0)
-            };
-            _painelMenu.Controls.Add(lblTitulo);
+            lblUsuario.Text = _sessao.FuncionarioNome + "\n" + _perfil;
 
-            var lblUsuario = new Label
-            {
-                Text = _sessao.FuncionarioNome + "\n" + _sessao.Cargo,
-                Dock = DockStyle.Top,
-                Height = 48,
-                ForeColor = Color.FromArgb(255, 201, 130),
-                Font = new Font("Segoe UI", 9F),
-                TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(18, 0, 0, 0)
-            };
-            _painelMenu.Controls.Add(lblUsuario);
-
-            var btnSair = new Button
-            {
-                Text = "Sair",
-                Dock = DockStyle.Bottom,
-                Height = 46,
-                FlatStyle = FlatStyle.Flat,
-                ForeColor = Color.White,
-                BackColor = Color.FromArgb(176, 58, 42),
-                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
-                Cursor = Cursors.Hand
-            };
-            btnSair.FlatAppearance.BorderSize = 0;
             btnSair.Click += (s, ev) => Close();
-            _painelMenu.Controls.Add(btnSair);
-
-            _painelMenu.Controls.Add(_menuItens);
 
             AdicionarItem("Painel", false);
             AdicionarItem("Mesas", false);
@@ -106,8 +44,14 @@ namespace Cely_Sabores
             AdicionarItem("Clientes", false);
             AdicionarItem("Pedidos", false);
             AdicionarItem("Reservas", false);
-            AdicionarItem("Relatórios", false);
+            AdicionarItem("Estoque", true);
+            AdicionarItem("Relatórios", true);
             AdicionarItem("Funcionários", true);
+        }
+
+        private string _perfil
+        {
+            get { return _sessao.EhGerente ? "Gerente" : "Atendente"; }
         }
 
         private void AdicionarItem(string nome, bool apenasGerente)
@@ -136,12 +80,33 @@ namespace Cely_Sabores
             botao.Click += (s, ev) => IrPara(nome);
 
             _botoesMenu[nome] = botao;
-            _menuItens.Controls.Add(botao);
+            menuItens.Controls.Add(botao);
         }
 
         public void IrPara(string nome)
         {
-            PainelBase painel = CriarPainel(nome);
+            if (EhRestritoAoGerente(nome))
+            {
+                MessageBox.Show(
+                    "O módulo '" + nome + "' é restrito à gerência.",
+                    "Cely Sabores", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            PainelBase painel;
+            try
+            {
+                painel = CriarPainel(nome);
+            }
+            catch (RegraNegocioException ex)
+            {
+                // rede de seguranca: mesmo forcando a rota, a regra de negocio
+                // recusa e o utilizador ve a mensagem em vez de a aplicacao cair
+                MessageBox.Show(ex.Message, "Cely Sabores",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (painel == null)
             {
                 MessageBox.Show("O módulo '" + nome + "' ainda não está disponível.",
@@ -160,25 +125,51 @@ namespace Cely_Sabores
             }
 
             _telaAtual = nome;
-            _painelConteudo.Controls.Clear();
+            pnlConteudo.Controls.Clear();
             painel.Dock = DockStyle.Fill;
-            _painelConteudo.Controls.Add(painel);
+            pnlConteudo.Controls.Add(painel);
         }
 
         private PainelBase CriarPainel(string nome)
         {
             switch (nome)
             {
-                case "Painel": return new PainelDashboard(_sessao, Servicos.Dashboard());
+                // cada role entra no seu proprio dashboard (requisito 5 e 15)
+                case "Painel":
+                    return _sessao.EhGerente
+                        ? (PainelBase)new PainelDashboardGerente(_sessao, Servicos.Dashboard())
+                        : new PainelDashboardFuncionario(_sessao, Servicos.Dashboard());
+
                 case "Mesas": return new PainelMesas(Servicos.Mesas());
                 case "Cardápio": return new PainelCardapio(Servicos.Cardapio());
                 case "Clientes": return new PainelClientes(Servicos.Clientes());
-                case "Pedidos": return new PainelPedidos(Servicos.Pedidos());
+                case "Pedidos": return new PainelPedidos(Servicos.Pedidos(), Servicos.Recibo());
                 case "Reservas": return new PainelReservas(Servicos.Reservas(), Servicos.Clientes());
                 case "Relatórios": return new PainelRelatorios(Servicos.Relatorios());
                 case "Funcionários": return new PainelFuncionarios(Servicos.Funcionarios());
+                case "Estoque": return new PainelEstoque(Servicos.Estoque());
                 default: return null;
             }
+        }
+
+        private static readonly string[] ModulosGerente = { "Estoque", "Relatórios", "Funcionários" };
+
+        private bool EhRestritoAoGerente(string nome)
+        {
+            if (_sessao.EhGerente)
+            {
+                return false;
+            }
+
+            foreach (var modulo in ModulosGerente)
+            {
+                if (modulo == nome)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public string TelaAtual
@@ -188,9 +179,9 @@ namespace Cely_Sabores
 
         public void AbrirPainel(Control painel)
         {
-            _painelConteudo.Controls.Clear();
+            pnlConteudo.Controls.Clear();
             painel.Dock = DockStyle.Fill;
-            _painelConteudo.Controls.Add(painel);
+            pnlConteudo.Controls.Add(painel);
         }
     }
 }

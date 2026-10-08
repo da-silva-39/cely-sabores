@@ -472,8 +472,8 @@ BEGIN
     SET @idFuncionario = SCOPE_IDENTITY();
 
     INSERT INTO dbo.Usuarios (FuncionarioId, Username, PasswordHash, Tipo, Ativo) VALUES
-        (@idGerente, N'gerente', N'100000:isYGwBS0h+NTlwtPQ3Z3FQ==:XGCcfHTTZybkM++OxnvRkBJ1PUxxVjeAK89yZ2IV5CU=', 1, 1),
-        (@idFuncionario, N'func', N'100000:OU/+vPbixhOx277S3b9/SA==:b4FTUSWohRJA1649qc0l7GAr4sBgOqMBnESE+iIr1x8=', 2, 1);
+        (@idGerente, N'gerente', N'100000:PcdnRrcydA6foegwMLB95Q==:cJLoKYiK+fpd+npKH5IV996B6pDWAj4jluXWsXjlIK0=', 1, 1),
+        (@idFuncionario, N'func', N'100000:4XM8jSxdkuMMx4vpnWes8g==:xly9xjlH3TUq8S1QGqlcHQKcZFa9v7LRS0IKg/feMdY=', 2, 1);
 END
 GO
 

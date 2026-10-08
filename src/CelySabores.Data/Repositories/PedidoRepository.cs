@@ -346,6 +346,42 @@ namespace CelySabores.Data.Repositories
             });
         }
 
+        /// <summary>
+        /// Pagamento de um pedido ja finalizado, ou null se ainda nao foi pago.
+        /// Usado para emitir e reimprimir recibos.
+        /// </summary>
+        public Pagamento ObterPagamento(int pedidoId)
+        {
+            var sql =
+                @"SELECT pg.Id, pg.PedidoId, pg.ValorRecebido, pg.Troco, pg.DataPagamento,
+                          pg.FuncionarioId, m.Numero AS MesaNumero, f.NomeCompleto AS FuncionarioNome
+                  FROM dbo.Pagamentos pg
+                  INNER JOIN dbo.Mesas m ON m.Id = (SELECT MesaId FROM dbo.Pedidos WHERE Id = pg.PedidoId)
+                  INNER JOIN dbo.Funcionarios f ON f.Id = pg.FuncionarioId
+                  WHERE pg.PedidoId = @PedidoId";
+
+            var tabela = Db.ExecuteDataTable(sql,
+                new System.Data.SqlClient.SqlParameter("@PedidoId", pedidoId));
+
+            if (tabela.Rows.Count == 0)
+            {
+                return null;
+            }
+
+            var r = tabela.Rows[0];
+            return new Pagamento
+            {
+                Id = Convert.ToInt32(r["Id"]),
+                PedidoId = Convert.ToInt32(r["PedidoId"]),
+                ValorRecebido = Convert.ToDecimal(r["ValorRecebido"]),
+                Troco = Convert.ToDecimal(r["Troco"]),
+                DataPagamento = Convert.ToDateTime(r["DataPagamento"]),
+                FuncionarioId = Convert.ToInt32(r["FuncionarioId"]),
+                MesaNumero = Convert.ToInt32(r["MesaNumero"]),
+                FuncionarioNome = Convert.ToString(r["FuncionarioNome"])
+            };
+        }
+
         private static Pedido Mapear(System.Data.DataRow linha)
         {
             return new Pedido

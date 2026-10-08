@@ -1,6 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Drawing;
+using System.ComponentModel;
 using System.Windows.Forms;
 using CelySabores.Business.Services;
 using CelySabores.Models.Entities;
@@ -8,62 +7,55 @@ using CelySabores.Models.Enums;
 
 namespace Cely_Sabores
 {
-    public sealed class PainelPedidos : PainelBase
+    // O layout esta em PainelPedidos.Designer.cs, para se poder ajustar tudo
+    // no designer do Visual Studio. Aqui fica apenas a logica.
+    public sealed partial class PainelPedidos : PainelBase
     {
         private readonly PedidoService _pedidoService;
-        private readonly DataGridView _tabela;
-        private readonly ComboBox _filtroEstado;
+        private readonly ReciboService _reciboService;
 
-        public PainelPedidos(PedidoService pedidoService) : base("Pedidos", "Carregando...")
+        // Construtor usado pelo designer: nao toca na base de dados.
+        public PainelPedidos()
+            : base("Pedidos", "Carregando...")
+        {
+            InitializeComponent();
+        }
+
+        public PainelPedidos(PedidoService pedidoService, ReciboService reciboService)
+            : this()
         {
             _pedidoService = pedidoService;
+            _reciboService = reciboService;
 
-            _filtroEstado = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Width = 170,
-                Font = new Font("Segoe UI", 9.5F),
-                Margin = new Padding(0, 0, 10, 0)
-            };
-            _filtroEstado.Items.AddRange(new object[] { "Todos", "Abertos", "Fechados", "Cancelados" });
-            _filtroEstado.SelectedIndex = 0;
-            _filtroEstado.SelectedIndexChanged += (s, ev) => Executar(Recarregar);
-
-            var filtros = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Top,
-                Height = 42,
-                FlowDirection = FlowDirection.LeftToRight,
-                WrapContents = false,
-                BackColor = Tema.Fundo
-            };
-            filtros.Controls.Add(_filtroEstado);
-
-            _tabela = Tema.Tabela("Nº", "Mesa", "Cliente", "Aberto em", "Estado", "Total");
-            _tabela.Columns[0].FillWeight = 8;
-            _tabela.Columns[1].FillWeight = 10;
-            _tabela.Columns[2].FillWeight = 26;
-            _tabela.Columns[3].FillWeight = 22;
-            _tabela.Columns[4].FillWeight = 16;
-            _tabela.Columns[5].FillWeight = 18;
-            _tabela.Columns[5].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            _tabela.CellDoubleClick += (s, ev) => Executar(AbrirSelecionado);
-
-            Conteudo.Controls.Add(_tabela);
-            Conteudo.Controls.Add(filtros);
+            cmbEstado.SelectedIndexChanged += (s, ev) => Executar(Recarregar);
+            dgvPedidos.CellDoubleClick += (s, ev) => Executar(AbrirSelecionado);
 
             AdicionarAcao("Actualizar", false, Recarregar);
             AdicionarAcao("Abrir pedido", true, AbrirPedido);
             AdicionarAcao("Ver / gerir", false, AbrirSelecionado);
+
+            // Nao existe "imprimir recibo" aqui de proposito: o funcionario
+            // emite o recibo no fim do atendimento, logo apos o pagamento.
+            // Qualquer impressao a partir do historico e uma reimpressao de um
+            // recibo antigo, que e uma tarefa exclusiva do gerente (requisito 9):
+            // o botao fica escondido para o funcionario, e o servico volta a
+            // recusar o pedido mesmo que a accao seja disparada.
+            var btnReimprimir = AdicionarAcao("Reimprimir recibo", false, ReimprimirReciboSelecionado);
+            btnReimprimir.Visible = EhGerente;
+
             AdicionarAcao("Cancelar pedido", false, CancelarSelecionado);
 
-            Recarregar();
+            // no designer nao se toca na base de dados
+            if (LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+            {
+                Recarregar();
+            }
         }
 
         public override void Recarregar()
         {
             EstadoPedido? estado = null;
-            switch (_filtroEstado.SelectedIndex)
+            switch (cmbEstado.SelectedIndex)
             {
                 case 1: estado = EstadoPedido.Aberto; break;
                 case 2: estado = EstadoPedido.Fechado; break;
@@ -71,11 +63,11 @@ namespace Cely_Sabores
             }
 
             var pedidos = _pedidoService.Listar(estado, null, null);
-            _tabela.Rows.Clear();
+            dgvPedidos.Rows.Clear();
 
             foreach (var pedido in pedidos)
             {
-                var indice = _tabela.Rows.Add(
+                var indice = dgvPedidos.Rows.Add(
                     pedido.Id,
                     pedido.MesaNumero,
                     string.IsNullOrEmpty(pedido.ClienteNome) ? "(balcão)" : pedido.ClienteNome,
@@ -83,7 +75,7 @@ namespace Cely_Sabores
                     DescreverEstado(pedido.Estado),
                     Tema.Moeda(pedido.ValorTotal));
 
-                _tabela.Rows[indice].Tag = pedido;
+                dgvPedidos.Rows[indice].Tag = pedido;
             }
 
             DefinirStatus(pedidos.Count + " pedido(s)");
@@ -102,13 +94,13 @@ namespace Cely_Sabores
 
         private Pedido Selecionado()
         {
-            if (_tabela.SelectedRows.Count == 0)
+            if (dgvPedidos.SelectedRows.Count == 0)
             {
                 Aviso("Seleccione um pedido.", MessageBoxIcon.Information);
                 return null;
             }
 
-            return _tabela.SelectedRows[0].Tag as Pedido;
+            return dgvPedidos.SelectedRows[0].Tag as Pedido;
         }
 
         private void AbrirPedido()
@@ -139,12 +131,40 @@ namespace Cely_Sabores
 
         private void AbrirDetalhe(Pedido pedido)
         {
-            using (var detalhe = new PainelPedidoDetalhe(_pedidoService, pedido))
+            using (var detalhe = new PainelPedidoDetalhe(_pedidoService, _reciboService, pedido))
             {
                 detalhe.ShowDialog(this);
             }
 
             Recarregar();
+        }
+
+        private void ReimprimirReciboSelecionado()
+        {
+            if (_reciboService == null)
+            {
+                return;
+            }
+
+            var pedido = Selecionado();
+            if (pedido == null)
+            {
+                return;
+            }
+
+            if (pedido.Estado != EstadoPedido.Fechado)
+            {
+                Aviso("Só é possível reimprimir o recibo de um pedido fechado.",
+                    MessageBoxIcon.Information);
+                return;
+            }
+
+            // ObterParaReimpressao exige gerente e regista a reimpressao
+            using (var formulario = new FormularioRecibo(
+                _reciboService.ObterParaReimpressao(pedido.Id)))
+            {
+                formulario.ShowDialog(this);
+            }
         }
 
         private void CancelarSelecionado()
